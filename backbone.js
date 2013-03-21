@@ -166,7 +166,13 @@
     var defaults;
     attributes || (attributes = {});
     if (options && options.parse) attributes = this.parse(attributes);
-    if (defaults = getValue(this, 'defaults')) {
+
+    ////// APIGEE /////
+      // true if we are setting the idAttribute but still want the object to be considered 'new'
+    this._new = options && options.new;
+    ////// APIGEE /////
+
+      if (defaults = getValue(this, 'defaults')) {
       attributes = _.extend({}, defaults, attributes);
     }
     if (options && options.collection) this.collection = options.collection;
@@ -237,8 +243,15 @@
       // Run validation.
       if (!this._validate(attrs, options)) return false;
 
-      // Check for changes of `id`.
-      if (this.idAttribute in attrs) this.id = attrs[this.idAttribute];
+        ////// APIGEE /////
+        // if this object is marked as 'new', don't copy the idAttribute the first time
+        if(this._new) {
+            delete this._new;
+        } else {
+            // Check for changes of `id`.
+            if (this.idAttribute in attrs) this.id = attrs[this.idAttribute];
+        }
+        ////// APIGEE /////
 
       var now = this.attributes;
       var escaped = this._escapedAttributes;
